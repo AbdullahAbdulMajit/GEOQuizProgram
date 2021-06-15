@@ -8,7 +8,7 @@ stored_usernames = []
 class StartingWindow:
     def __init__(self, parent):
  
-        background_color = "Green"
+        background_color = "#DEBB74"
 
         #FRAME
         self.quiz_frame = Frame(parent, bg = background_color, padx = 100, pady = 100)
@@ -27,7 +27,7 @@ class StartingWindow:
         self.entry_box.grid(row = 2, pady = 20)
         
         #BUTTON
-        self.continue_button = Button(self.quiz_frame, text = "NEXT", bg = "Light Green", command = self.name_collection)
+        self.continue_button = Button(self.quiz_frame, text = "START", bg = "#3F9D2F", command = self.name_collection)
         self.continue_button.grid(row = 3, pady = 20) 
        
     def name_collection(self):
