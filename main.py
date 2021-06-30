@@ -1,13 +1,14 @@
 from tkinter import * #imports codes from tkinter library
 from tkinter import messagebox #Import message box widget.
+import re   
 import random
 
 
+background_color = "#DEBB74"
 stored_usernames = []
 global q_a
 asked = []
 score = 0
-
 q_a = {
 
   1 : ["Where is Mount Everest located in?", 'Nepal', 'Japan', 'New Zealand', 'Africa', 'Nepal', 1],
@@ -40,25 +41,48 @@ class Startingwindow:
         background_color = "#DEBB74"
 
         #FRAME
-        self.quiz_frame = Frame(parent, bg = background_color, padx = 100, pady = 100)
+        self.quiz_frame = Frame(parent, bg = background_color, padx = 167, pady = 110)
         self.quiz_frame.grid()
 
         #TITLE
-        self.heading_label = Label(self.quiz_frame, text = "GEOGRAPHY QUIZ", fg = "#A52A2A", font = ("TW Cent MT", "18", "bold"), bg = background_color)
+        self.heading_label = Label(self.quiz_frame, text = "GEOGRAPHY QUIZ", fg = "#A52A2A", font = ("TW Cent MT", "30", "bold"), bg = background_color)
         self.heading_label.grid(row = 0)
 
         #USER INFO
-        self.user_label= Label(self.quiz_frame, text = "Enter your name:", fg = "#A52A2A", font = ("TW Cent MT","16"), bg = background_color)
+        self.user_label= Label(self.quiz_frame, text = "Enter your name:", fg = "#A52A2A", font = ("TW Cent MT","18"), bg = background_color)
         self.user_label.grid(row = 1, pady = 20) 
         
         #ENTRY BOX
-        self.entry_box= Entry(self.quiz_frame, background = 'Light Gray', borderwidth = 2, relief = SUNKEN)
+        self.pattern = re.compile("^\\w{0,16}$") # '^' matches the start of this string, '\\' disallows special characters to be inputted, 'w' allows alphabets, num, and underscore, {0. 13} is character limit set to max 13 characters, $ matches the end of the string.
+        user_validation = (self.quiz_frame.register(self.username_boundary), "%i", "%P") 
+        self.entry_box= Entry(self.quiz_frame, background = 'Light Gray', borderwidth = 2, relief = SUNKEN, validate = "key", validatecommand = user_validation, invalidcommand = self.name_error)
         self.entry_box.grid(row = 2, pady = 20)
+        self.name_input = self.entry_box.get()
         
         #BUTTON
-        self.continue_button = Button(self.quiz_frame, text = "START", fg = "White", bg = "#3F9D2F", command = self.name_collection)
+        self.continue_button = Button(self.quiz_frame, text = "START", font = ("14"), fg = "White", bg = "#3F9D2F", command = self.empty)
         self.continue_button.grid(row = 3, pady = 20) 
-       
+
+        
+    #User Entry Error Handling and Boundary. 
+    def username_boundary(self, index, username): 
+        return self.pattern.match(username) is not None #make sure user input matches requirements.
+        
+    def name_error(self):  #if user enters more than 13 characters or special characters, user gets error.
+        self.error = Label(self.quiz_frame, text = "*Invalid character.*", fg = "red", padx = 100, bg = background_color)
+        self.error.grid(row = 5)
+        self.error.after(1500, self.error.destroy) #label appears then disappears after 2s.
+
+    def empty(self): #if user inputs nothing, give error.
+        self.name_input = self.entry_box.get()
+        if self.name_input == "":
+            self.error = Label(self.quiz_frame, text = "*You haven't entered a name.*", fg = "red", padx = 100, bg = background_color)
+            self.error.grid(row = 5)
+            self.error.after(1500, self.error.destroy) #label appears then disappears after 1.5s. 
+        else:
+            #If user inputs their name, their name is appended into a list in the self.name_collection() def method below, then display questions. 
+            self.name_collection()
+
     def name_collection(self):
         name = self.entry_box.get()
         stored_usernames.append(name) #stores input to the name list variable
@@ -66,7 +90,6 @@ class Startingwindow:
         self.quiz_frame.destroy()
         Questionwindow(root)
         
-
 
 
 #QUIZ QUESTION PAGES
@@ -77,39 +100,40 @@ class Questionwindow:
     self.var1 = IntVar()
 
     #Set frame for questions.
-    self.quiz_frame = Frame(parent, bg = background_color, pady = 6, width = 600, height = 700)
+    self.quiz_frame = Frame(parent, bg = background_color)
     self.quiz_frame.grid()
 
     #Questions displayed from 'q_a' questions and answers list.
-    self.question_label = Label(self.quiz_frame, text = q_a[quenum][0], font = ("Helvetica", "10", "bold"), width = 90, pady = 30, wraplength = 600)
-    self.question_label.grid(row = 2, pady = (20, 20))
+    self.question_label = Label(self.quiz_frame, text = q_a[quenum][0], font = ("Helvetica", "16", "bold"), width = 54, pady = 10)
+    self.question_label.grid(row = 2, pady =20)
 
     #Selection options for each questions displayed using radio buttons.
-    self.rb1 = Radiobutton(self.quiz_frame, text = q_a[quenum][1], value = 1, indicator = 0, variable = self.var1, command = self.test_progress, pady = 60, font = ("Verdana", "11"))
-    self.rb1.grid(row = 3, sticky = W, column = 0)
+    self.rb1 = Radiobutton(self.quiz_frame, text = q_a[quenum][1], value = 1, indicator = 0, variable = self.var1
+    , command = self.test_progress, pady = 60, padx = 1, font = ("Verdana", "11"), relief = RAISED, width = 37, bg = "Orange", activebackground = "Dark Orange")
+    self.rb1.grid(row = 3, pady = 8, sticky = W, column = 0)
 
-    self.rb2 = Radiobutton(self.quiz_frame, text = q_a[quenum][2], value = 2, indicator = 0, variable = self.var1, command = self.test_progress, pady = 60, font = ("Verdana","11"))
-    self.rb2.grid(row = 3,  sticky = E, column = 0)
+    self.rb2 = Radiobutton(self.quiz_frame, text = q_a[quenum][2], value = 2, indicator = 0, variable = self.var1, command = self.test_progress, pady = 60, padx = 1, font = ("Verdana","11"), relief = RAISED, width = 37, bg = "Orange", activebackground = "Dark Orange")
+    self.rb2.grid(row = 3,pady = 8, sticky = E, column = 0)
 
-    self.rb3 = Radiobutton(self.quiz_frame, text = q_a[quenum][3], value = 3, indicator = 0, variable = self.var1, command = self.test_progress,  pady = 60, font = ("Verdana","11"))
-    self.rb3.grid(row = 4,sticky = W, column = 0)
+    self.rb3 = Radiobutton(self.quiz_frame, text = q_a[quenum][3], value = 3, indicator = 0, variable = self.var1, command = self.test_progress,  pady = 60, padx = 1, font = ("Verdana","11"), relief = RAISED, width = 37, bg = "Orange", activebackground = "Dark Orange")
+    self.rb3.grid(row = 4, pady = 8, sticky = W, column = 0)
 
-    self.rb4 = Radiobutton(self.quiz_frame, text = q_a[quenum][4], value = 4, indicator = 0, variable = self.var1, command = self.test_progress, pady = 60, font = ("Verdana","11"))
-    self.rb4.grid(row = 4,  sticky = E, column = 0)
+    self.rb4 = Radiobutton(self.quiz_frame, text = q_a[quenum][4], value = 4, indicator = 0, variable = self.var1, command = self.test_progress, pady = 60, padx = 1, font = ("Verdana","11"), relief = RAISED, width = 37, bg = "Orange", activebackground = "Dark Orange")
+    self.rb4.grid(row = 4, pady = 8, sticky = E, column = 0)
 
     #Quit button if user wants to quit during the quiz.
-    self.quit_button = Button(self.quiz_frame, text = "QUIT", padx = 2, pady =1, bg = "Red", relief = RAISED, command = self.quitButton)
-    self.quit_button.grid(row = 0, sticky = W, padx = 10, pady = (10,4))
+    self.quit_button = Button(self.quiz_frame, text = "QUIT", bg = "Red", relief = RAISED, command = self.quit)
+    self.quit_button.grid(row = 0, sticky = W, padx = 10, pady = (10))
 
     #Score display.
     self.score_update = Label(self.quiz_frame, text = "Score: " + str(score), bg = background_color, font = ("bold"))
-    self.score_update.grid(row = 0, padx = 20, pady = (10,4), sticky = E)
+    self.score_update.grid(row = 0, padx = 20, pady = (10), sticky = E)
         
   #If user wants to leave during the quiz in progress, user is asked to confirm, then taken to leaderboard.
-  def quitButton(self):
+  def quit(self):
     result = messagebox.askyesno("Exit", "Are you sure?") #Ask user to confirm
     if result == True: #if yes, then takes user to leaderboard.
-      self.leader_board()
+      self.leader_board() 
     else: #or else continue quiz.
       pass 
 
@@ -188,14 +212,6 @@ class Questionwindow:
     open_leaderb.num1.config(text = return_string)
 
 
-
-
-
-        
-
-
-
-
 ##Display Leaderboard in this class:
 class Leaderboardwindow:
 
@@ -204,7 +220,6 @@ class Leaderboardwindow:
     background_color = "#DEBB74"
     self.endbox = Toplevel(root)
     self.endbox.title("Quiz Leaderboard")
-    self.endbox.geometry("600x800")
     self.endbox.resizable(False, False)
 
     #Leaderboard frame
@@ -234,17 +249,12 @@ class Leaderboardwindow:
     root.destroy()
 
 
-
-
-
- 
-    
-
-
-
 ##################################################################################
 if __name__ == "__main__": #Makes the file the starter file
     root = Tk() #Creates a pop up window
     root.title("Geography Quiz") 
     startingwindow_object = Startingwindow(root)
+    root.geometry("700x450")
+    root.resizable(False, False)
     root.mainloop() #Keeps the window on
+
